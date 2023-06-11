@@ -1,4 +1,6 @@
 using Serilog;
+using Microsoft.AspNetCore.Authentication.Google;
+using Duende.IdentityServer;
 
 namespace IdentityServer;
 
@@ -19,13 +21,21 @@ internal static class HostingExtensions
             .AddInMemoryClients(Config.Clients)
             .AddTestUsers(TestUsers.Users);
 
+        builder.Services.AddAuthentication()
+            .AddGoogle("Google", options =>
+            {
+                options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+                options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+                options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+            });
+
         return builder.Build();
     }
-    
+
     public static WebApplication ConfigurePipeline(this WebApplication app)
-    { 
+    {
         app.UseSerilogRequestLogging();
-    
+
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -33,7 +43,7 @@ internal static class HostingExtensions
 
         app.UseStaticFiles();
         app.UseRouting();
-            
+
         app.UseIdentityServer();
 
         app.UseAuthorization();
