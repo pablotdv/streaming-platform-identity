@@ -21,13 +21,15 @@ builder.Services.AddAuthentication(options =>
         options.ClientId = "web";
         options.ClientSecret = "secret";
         options.ResponseType = "code";
+        options.SaveTokens = true;
 
         options.Scope.Clear();
         options.Scope.Add("openid");
         options.Scope.Add("profile");
         options.Scope.Add("api1");
-
         options.Scope.Add("verification");
+        options.Scope.Add("offline_access");
+        options.GetClaimsFromUserInfoEndpoint = true;
         options.ClaimActions.MapUniqueJsonKey("email_verified", "email_verified");
 
         options.SaveTokens = true;
