@@ -2,6 +2,7 @@ using Duende.IdentityServer;
 using IdentityServerAspNetIdentity.Data;
 using IdentityServerAspNetIdentity.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -36,7 +37,7 @@ internal static class HostingExtensions
             .AddInMemoryClients(Config.Clients)
             .AddAspNetIdentity<ApplicationUser>()
             .AddProfileService<CustomProfileService>();
-        
+
         builder.Services.AddAuthentication()
             .AddGoogle(options =>
             {
@@ -49,13 +50,15 @@ internal static class HostingExtensions
                 options.ClientSecret = "copy client secret from Google here";
             });
 
+        builder.Services.AddSingleton<IEmailSender, EmailSender>();
+
         return builder.Build();
     }
-    
+
     public static WebApplication ConfigurePipeline(this WebApplication app)
-    { 
+    {
         app.UseSerilogRequestLogging();
-    
+
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
@@ -65,10 +68,18 @@ internal static class HostingExtensions
         app.UseRouting();
         app.UseIdentityServer();
         app.UseAuthorization();
-        
+
         app.MapRazorPages()
             .RequireAuthorization();
 
         return app;
+    }
+}
+
+public class EmailSender : IEmailSender
+{
+    public Task SendEmailAsync(string email, string subject, string htmlMessage)
+    {
+        return Task.CompletedTask;
     }
 }
