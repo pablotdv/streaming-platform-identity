@@ -8,9 +8,9 @@ namespace MyApp.Namespace
 {
     public class CallApiModel : PageModel
     {
-        public string JsonValue = string.Empty;
+        public string Json = string.Empty;
 
-        public async void OnGet()
+        public async Task OnGet()
         {
             var accessToken = await HttpContext.GetTokenAsync("access_token");
             var client = new HttpClient();
@@ -18,8 +18,9 @@ namespace MyApp.Namespace
             var content = await client.GetStringAsync("https://localhost:6001/identity");
 
             var parsed = JsonDocument.Parse(content);
-            var formatted =JsonSerializer.Serialize(parsed, new JsonSerializerOptions { WriteIndented = true });
-            JsonValue = formatted;
+            var formatted = JsonSerializer.Serialize(parsed, new JsonSerializerOptions { WriteIndented = true });
+
+            Json = formatted;
         }
     }
 }

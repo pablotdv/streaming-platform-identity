@@ -2,6 +2,7 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
+    var authenticateResult = await HttpContext.AuthenticateAsync();
 }
 
 @using Microsoft.AspNetCore.Authentication
@@ -19,10 +20,13 @@
 <h2>Properties</h2>
 
 <dl>
-    @foreach (var prop in (await HttpContext.AuthenticateAsync()).Properties.Items)
+    @if (authenticateResult.Succeeded)
     {
-        <dt>@prop.Key</dt>
-        <dd>@prop.Value</dd>
+        @foreach (var prop in (authenticateResult.Properties.Items))
+        {
+            <dt>@prop.Key</dt>
+            <dd>@prop.Value</dd>
+        }
     }
 </dl>
 
