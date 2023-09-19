@@ -4,6 +4,7 @@ using IdentityServerAspNetIdentity.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Logging;
 using Serilog;
 
 namespace IdentityServerAspNetIdentity;
@@ -32,12 +33,12 @@ internal static class HostingExtensions
                 // see https://docs.duendesoftware.com/identityserver/v6/fundamentals/resources/
                 options.EmitStaticAudienceClaim = true;
             })
-            .AddInMemoryIdentityResources(Config.IdentityResources)
             .AddInMemoryApiScopes(Config.ApiScopes)
             .AddInMemoryClients(Config.Clients)
+            .AddInMemoryApiResources(Config.ApiResources)
             .AddAspNetIdentity<ApplicationUser>()
             .AddProfileService<CustomProfileService>();
-
+    
         builder.Services.AddAuthentication()
             .AddGoogle(options =>
             {
@@ -52,6 +53,11 @@ internal static class HostingExtensions
 
         builder.Services.AddSingleton<IEmailSender, EmailSender>();
 
+        builder.Services.AddLogging(options =>
+            {
+                options.AddFilter("Duende", LogLevel.Debug);
+            });
+
         return builder.Build();
     }
 
@@ -59,10 +65,8 @@ internal static class HostingExtensions
     {
         app.UseSerilogRequestLogging();
 
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseDeveloperExceptionPage();
-        }
+        app.UseDeveloperExceptionPage();
+        IdentityModelEventSource.ShowPII = true;
 
         app.UseStaticFiles();
         app.UseRouting();
